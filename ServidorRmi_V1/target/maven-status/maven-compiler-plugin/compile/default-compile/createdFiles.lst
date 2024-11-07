@@ -1,0 +1,5 @@
+pacote\RmiImplementation.class
+pacote\RmiInterface.class
+pacote\Run.class
+pacote\Server.class
+com\mycompany\servidorrmi_v1\ServidorRmi_V1.class
