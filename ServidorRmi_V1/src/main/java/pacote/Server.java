@@ -16,12 +16,12 @@ import pacote.RmiImplementation;
  */
 public class Server {
     public Server(){
-    try{
-        Registry reg=LocateRegistry.createRegistry(6666);
-        RmiInterface objRmi = new RmiImplementation();
-        reg.bind("Servidor", objRmi);
-    }catch(Exception e){
-        JOptionPane.showMessageDialog(null, "Erro"+ e.getMessage());
-    }
+        try{
+            Registry reg=LocateRegistry.createRegistry(6666);
+            RmiInterface objRmi = new RmiImplementation();
+            reg.bind("Servidor", objRmi);
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Erro"+ e.getMessage());
+        }
     }
 }
