@@ -1,6 +1,9 @@
 pacote\RmiImplementation.class
 pacote\RmiInterface.class
-pacote\Run.class
+pacote\Server$2.class
 pacote\Server.class
-pacote\Server$1.class
 com\mycompany\servidorrmi_v1\ServidorRmi_V1.class
+pacote\Run.class
+pacote\Server$3.class
+pacote\Server$4.class
+pacote\Server$1.class

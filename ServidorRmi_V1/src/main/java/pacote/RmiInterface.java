@@ -12,5 +12,8 @@ import java.rmi.RemoteException;
  * @author admlab
  */
 public interface RmiInterface extends Remote{
-    public String somar(int v1, int v2) throws RemoteException;
+    public String somar(double v1, double v2) throws RemoteException;
+    public String subtrair(double v1, double v2) throws RemoteException;
+    public String multiplicar(double v1, double v2) throws RemoteException;
+    public String dividir(double v1, double v2) throws RemoteException;
 }

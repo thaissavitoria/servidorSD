@@ -15,11 +15,53 @@ public class RmiImplementation extends UnicastRemoteObject implements RmiInterfa
     }
     
     @Override
-    public String somar(int v1, int v2) throws RemoteException {
+    public String somar(double v1, double v2) throws RemoteException {
         String sRet="Não foi possível somar";
         
         try{
-            sRet="A soma é: "+(v1+v2);
+            sRet="O resultado da soma é: "+(v1+v2);
+        }catch(Exception e){
+            throw new RemoteException("Erro:" + e.getMessage());
+        }
+        
+        return sRet;
+    }
+    
+    @Override
+    public String subtrair(double v1, double v2) throws RemoteException {
+        String sRet="Não foi possível subtrair";
+        
+        try{
+            sRet="O resultado da subtração é: "+(v1+v2);
+        }catch(Exception e){
+            throw new RemoteException("Erro:" + e.getMessage());
+        }
+        
+        return sRet;
+    }
+    
+    @Override
+    public String multiplicar(double v1, double v2) throws RemoteException {
+        String sRet="Não foi possível multiplicar";
+        
+        try{
+            sRet="O resultado da multiplicação é: "+(v1+v2);
+        }catch(Exception e){
+            throw new RemoteException("Erro:" + e.getMessage());
+        }
+        
+        return sRet;
+    }
+    
+    
+    @Override
+    public String dividir(double v1, double v2) throws RemoteException {
+        String sRet="Não foi possível dividir";
+        
+        try{
+            if(v2!=0.0){
+                sRet="O resultado da divisão é: "+(v1/v2);
+            }
         }catch(Exception e){
             throw new RemoteException("Erro:" + e.getMessage());
         }

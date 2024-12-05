@@ -10,6 +10,7 @@ import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -30,11 +31,14 @@ public class Server {
     Menu mnuActions;
     CheckboxMenuItem itemStart;
     MenuItem itemStop;
-    MenuItem itemAbout;
-
+    MenuItem itemCalcular;
+    MenuItem itemExit;
     PopupMenu popup;
     TrayIcon trayIcon;
     SystemTray systemTray;
+    private RmiInterface objRmi;
+    private Registry reg;
+    private boolean servidorRodando;
 
     public Server() {
         try {
@@ -43,20 +47,24 @@ public class Server {
                 return;
             }
 
-            Registry reg = LocateRegistry.createRegistry(6666);
-            RmiInterface objRmi = new RmiImplementation();
+            servidorRodando = false;
+
+            reg = LocateRegistry.createRegistry(6666);
+            objRmi = new RmiImplementation();
             mnuActions = new Menu("Ações");
             itemStart = new CheckboxMenuItem("Iniciar");
             itemStop = new MenuItem("Parar");
-            itemAbout = new MenuItem("Sobre");
+            itemCalcular = new MenuItem("Calcular");
+            itemExit = new MenuItem("Sair");
 
             mnuActions.add(itemStart);
             mnuActions.add(itemStop);
+            mnuActions.add(itemCalcular);
 
             popup = new PopupMenu();
             popup.add(mnuActions);
             popup.addSeparator();
-            popup.add(itemAbout);
+            popup.add(itemExit);
 
             ImageIcon imageIcon = new ImageIcon("images/servidor.jpg");
             trayIcon = new TrayIcon(imageIcon.getImage());
@@ -66,7 +74,7 @@ public class Server {
             try {
                 systemTray.add(trayIcon);
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Erro" + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Erro: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -74,24 +82,116 @@ public class Server {
                 @Override
                 public void itemStateChanged(ItemEvent e) {
                     try {
-                        if(e.getStateChange()==1){
-                          reg.rebind("Servidor", objRmi);
-                          JOptionPane.showMessageDialog(null, "Servidor iniciado!");
-                        }
-                        else{
-                          reg.unbind("Servidor");
-                          UnicastRemoteObject.unexportObject(objRmi, true);
-                          JOptionPane.showMessageDialog(null, "Servidor parado!");
+                        if (e.getStateChange() == 1) {
+                            reg.rebind("Servidor", objRmi);
+                            servidorRodando = true;
+                            itemCalcular.setEnabled(true);
+                            JOptionPane.showMessageDialog(null, "Servidor iniciado!");
+                        } else {
+                            reg.unbind("Servidor");
+                            UnicastRemoteObject.unexportObject(objRmi, true);
+                            JOptionPane.showMessageDialog(null, "Servidor parado!");
                         }
                     } catch (Exception erro) {
-                        JOptionPane.showMessageDialog(null, "Erro" + erro.getMessage());
+                        JOptionPane.showMessageDialog(null, "Erro: " + erro.getMessage());
                     }
 
                 }
             });
-            
+
+            itemCalcular.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    realizarCalculo();
+                }
+            });
+            itemCalcular.setEnabled(false);
+
+            itemStop.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    stopRmiServices();
+                }
+            });
+
+            itemExit.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    stopRmiServices();
+
+                    systemTray.remove(trayIcon);
+
+                    System.exit(0);
+                }
+            });
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erro" + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro: " + e.getMessage());
+        }
+    }
+
+    private void stopRmiServices() {
+        try {
+            if (servidorRodando) {
+                reg.unbind("Servidor");
+
+                UnicastRemoteObject.unexportObject(objRmi, true);
+                UnicastRemoteObject.unexportObject(reg, true);
+
+                servidorRodando = false;
+                itemCalcular.setEnabled(false);
+
+                JOptionPane.showMessageDialog(null, "Servidor parado!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Servidor já está parado.");
+            }
+        } catch (Exception erro) {
+            JOptionPane.showMessageDialog(null, "Error: " + erro.getMessage());
+        }
+    }
+
+    private void realizarCalculo() {
+        try {
+            String valor1Str = JOptionPane.showInputDialog("Digite o primeiro valor:");
+            double valor1 = Double.parseDouble(valor1Str);
+
+            String valor2Str = JOptionPane.showInputDialog("Digite o segundo valor:");
+            double valor2 = Double.parseDouble(valor2Str);
+
+            String[] operacoes = {"Soma", "Subtração", "Multiplicação", "Divisão"};
+            String operacao = (String) JOptionPane.showInputDialog(
+                    null,
+                    "Escolha a operação:",
+                    "Calculadora RMI",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    operacoes,
+                    operacoes[0]
+            );
+
+            String resultado = "";
+
+            switch (operacao) {
+                case "Soma":
+                    resultado = objRmi.somar(valor1, valor2);
+                    break;
+                case "Subtração":
+                    resultado = objRmi.subtrair(valor1, valor2);
+                    break;
+                case "Multiplicação":
+                    resultado = objRmi.multiplicar(valor1, valor2);
+                    break;
+                case "Divisão":
+                    resultado = objRmi.dividir(valor1, valor2);
+                    break;
+            }
+
+            JOptionPane.showMessageDialog(null, resultado);
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Valor inválido digitado!");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro: " + ex.getMessage());
         }
     }
 }
